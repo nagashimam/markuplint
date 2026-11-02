@@ -55,6 +55,22 @@ export function toFileURL(filePath: string): string {
 	return `file://${segments.join('/')}`;
 }
 
+/**
+ * Whether the specifier is spelled as a file path rather than a module name:
+ * an absolute path (POSIX or Windows), or a relative one that begins with `./`,
+ * `../`, `.` or `..` (with either kind of separator).
+ *
+ * Such a specifier can only be resolved against the directory of the file that
+ * declares it. It must never be handed to `import()` / `require.resolve()` as it is,
+ * since those resolve a relative specifier against the file that calls them (i.e. where
+ * Markuplint is installed), and a file can happen to exist there.
+ *
+ * Like {@link toFileURL}, it recognizes the Windows form on POSIX as well.
+ */
+export function isPathSpecifier(specifier: string): boolean {
+	return /^(?:\.{1,2}(?:[/\\]|$)|[/\\]|[a-z]:[/\\])/i.test(specifier);
+}
+
 /** Normalizes for the `ignore` library, whose matching is gitignore-style. */
 export function normalizeForIgnore(filePath: string, relative = false): string {
 	const hasBang = filePath.startsWith('!');
