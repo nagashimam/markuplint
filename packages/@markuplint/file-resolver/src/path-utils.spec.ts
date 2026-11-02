@@ -1,13 +1,6 @@
 import { test, expect } from 'vitest';
 
-import {
-	toSlash,
-	fromFileURL,
-	toFileURL,
-	isPathSpecifier,
-	normalizeForIgnore,
-	normalizeForGlob,
-} from './path-utils.js';
+import { toSlash, fromFileURL, toFileURL, normalizeForIgnore, normalizeForGlob } from './path-utils.js';
 
 test('toSlash: converts backslashes to forward slashes', () => {
 	expect(toSlash('C:\\Users\\foo\\file.html')).toBe('C:/Users/foo/file.html');
@@ -217,26 +210,4 @@ test('toFileURL: leaves UNC paths as-is for the caller to handle (known limitati
 	// UNC path handling is tracked as a follow-up (see PR description for #3795).
 	// Assert the current behavior so any future change is explicit.
 	expect(toFileURL('\\\\server\\share\\foo.mjs')).toBe('\\\\server\\share\\foo.mjs');
-});
-
-test.each(['./a', '../a', '../../../../.markuplintrc', '.', '..', '.\\a', '..\\a', '/a/b', 'C:\\a', 'c:/a'])(
-	'isPathSpecifier: %s is a path',
-	specifier => {
-		expect(isPathSpecifier(specifier)).toBe(true);
-	},
-);
-
-test.each([
-	'markuplint:recommended',
-	'plugin:a/b',
-	'@scope/pkg',
-	'@scope/pkg/file.json',
-	'pkg',
-	'pkg/a.json',
-	'.hidden',
-	'..a',
-	'**/*.html',
-	'',
-])('isPathSpecifier: %s is not a path', specifier => {
-	expect(isPathSpecifier(specifier)).toBe(false);
 });

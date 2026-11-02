@@ -3,18 +3,19 @@ import path from 'node:path';
 import { isPluginModuleName } from './is-plugin-module-name.js';
 import { isPresetModuleName } from './is-preset-module-name.js';
 import { moduleExists } from './module-exists.js';
-import { isPathSpecifier } from './path-utils.js';
 
 export async function resolveNameOrAbsPath(dir: string, pathOrModName: string) {
 	const bangAndPath = /^(!)(.*)/.exec(pathOrModName) ?? [];
 	const bang = bangAndPath[1] ?? '';
 	const pathname = bangAndPath[2] ?? pathOrModName;
 
-	// A specifier spelled as a path (`./`, `../`, absolute) is never a module name.
-	// Asking `moduleExists()` about it would resolve it against where Markuplint is
-	// installed, not against `dir`, and a file there could make it "exist".
+	// A path (`./`, `../`, absolute) is resolved from `dir`, the directory of the file that
+	// declares it. `moduleExists()` resolves it from where Markuplint is installed instead, and a
+	// file there could make it "exist" and keep it relative.
+	const isPath = path.isAbsolute(pathname) || /^\.\.?(?:[/\\]|$)/.test(pathname);
+
 	if (
-		!isPathSpecifier(pathname) &&
+		!isPath &&
 		((await moduleExists(pathOrModName)) || isPresetModuleName(pathOrModName) || isPluginModuleName(pathOrModName))
 	) {
 		return pathOrModName;
